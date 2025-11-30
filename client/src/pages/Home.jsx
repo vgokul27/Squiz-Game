@@ -1,6 +1,16 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Zap, Users, Trophy, Clock, Brain, Sparkles } from "lucide-react";
+import {
+  Zap,
+  Users,
+  Trophy,
+  Clock,
+  Brain,
+  Sparkles,
+  BookOpen,
+  GraduationCap,
+  Lightbulb,
+} from "lucide-react";
 
 const Home = () => {
   const features = [
@@ -48,124 +58,199 @@ const Home = () => {
     },
   };
 
+  // Floating quiz elements
+  const floatingElements = [
+    { icon: BookOpen, delay: 0, x: "10%", y: "20%" },
+    { icon: GraduationCap, delay: 2, x: "80%", y: "15%" },
+    { icon: Brain, delay: 1, x: "70%", y: "60%" },
+    { icon: Lightbulb, delay: 3, x: "15%", y: "70%" },
+    { icon: Trophy, delay: 1.5, x: "85%", y: "40%" },
+    { icon: Sparkles, delay: 2.5, x: "25%", y: "45%" },
+  ];
+
   return (
     <div className="min-h-screen pt-16">
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 lg:py-32">
-        {/* Animated Background */}
+      <section className="relative overflow-hidden py-14 lg:py-14 min-h-[90vh]">
+        {/* Enhanced Animated Background */}
         <div className="absolute inset-0 overflow-hidden">
+          {/* Gradient Orbs */}
           <motion.div
             animate={{
               scale: [1, 1.2, 1],
               rotate: [0, 90, 0],
+              x: [0, 50, 0],
             }}
             transition={{
               duration: 20,
               repeat: Infinity,
               ease: "linear",
             }}
-            className="absolute -top-1/2 -left-1/2 w-full h-full bg-primary-500/10 rounded-full blur-3xl"
+            className="absolute -top-1/2 -left-1/4 w-96 h-96 bg-primary-500/20 rounded-full blur-3xl"
           />
           <motion.div
             animate={{
               scale: [1.2, 1, 1.2],
               rotate: [90, 0, 90],
+              x: [0, -50, 0],
             }}
             transition={{
-              duration: 20,
+              duration: 25,
               repeat: Infinity,
               ease: "linear",
             }}
-            className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-primary-600/10 rounded-full blur-3xl"
+            className="absolute top-1/4 right-0 w-80 h-80 bg-primary-600/15 rounded-full blur-3xl"
+          />
+          <motion.div
+            animate={{
+              scale: [1, 1.3, 1],
+              rotate: [0, -90, 0],
+              y: [0, 30, 0],
+            }}
+            transition={{
+              duration: 18,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+            className="absolute bottom-0 left-1/3 w-72 h-72 bg-purple-500/15 rounded-full blur-3xl"
+          />
+
+          {/* Floating Quiz Icons */}
+          {floatingElements.map((element, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{
+                opacity: [0.1, 0.3, 0.1],
+                scale: [1, 1.2, 1],
+                y: [0, -20, 0],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                delay: element.delay,
+                ease: "easeInOut",
+              }}
+              className="absolute"
+              style={{ left: element.x, top: element.y }}
+            >
+              <element.icon className="w-8 h-8 text-primary-400/30" />
+            </motion.div>
+          ))}
+
+          {/* Animated Grid Pattern */}
+          <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+
+          {/* Animated Lines */}
+          <svg className="absolute inset-0 w-full h-full">
+            <motion.line
+              x1="0%"
+              y1="30%"
+              x2="100%"
+              y2="30%"
+              stroke="rgba(139, 92, 246, 0.1)"
+              strokeWidth="2"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.line
+              x1="0%"
+              y1="60%"
+              x2="100%"
+              y2="60%"
+              stroke="rgba(139, 92, 246, 0.1)"
+              strokeWidth="2"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "linear",
+                delay: 1,
+              }}
+            />
+          </svg>
+
+          {/* Knowledge Symbols */}
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+            className="absolute top-1/4 right-1/4 w-32 h-32 border-2 border-primary-400/10 rounded-full"
+          />
+          <motion.div
+            animate={{ rotate: -360 }}
+            transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
+            className="absolute bottom-1/3 left-1/4 w-24 h-24 border-2 border-purple-400/10 rounded-full"
           />
         </div>
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center max-w-4xl mx-auto"
-          >
-            {/* Badge */}
+          <div className="flex items-center min-h-[70vh]">
+            {/* Hero Content - Left Aligned */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center space-x-2 bg-primary-500/20 border border-primary-500/50 rounded-full px-4 py-2 mb-6"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-left max-w-3xl"
             >
-              <Sparkles className="w-4 h-4 text-primary-400" />
-              <span className="text-primary-400 text-sm font-semibold">
-                Real-time Multiplayer Quiz Game
-              </span>
-            </motion.div>
-
-            {/* Main Heading */}
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-6"
-            >
-              Challenge Your Friends.{" "}
-              <span className="glow-text">Test Your Knowledge.</span>
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="text-lg sm:text-xl text-dark-500 mb-8 max-w-2xl mx-auto"
-            >
-              Join the ultimate multiplayer quiz experience. Compete in
-              real-time, climb leaderboards, and prove you're the smartest
-              player in the room.
-            </motion.p>
-
-            {/* CTA Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-            >
-              <Link
-                to="/join"
-                className="btn-primary text-lg px-8 py-4 flex items-center space-x-2"
+              {/* Badge */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2 }}
+                className="inline-flex items-center space-x-2 bg-primary-500/20 border border-primary-500/50 rounded-full px-4 py-2 mb-6"
               >
-                <Zap className="w-5 h-5" />
-                <span>Start Quiz Now</span>
-              </Link>
-              <Link to="/create" className="btn-secondary text-lg px-8 py-4">
-                Create Your Own Quiz
-              </Link>
-            </motion.div>
+                <Sparkles className="w-4 h-4 text-primary-400" />
+                <span className="text-primary-400 text-sm font-semibold">
+                  Real-time Multiplayer Quiz Game
+                </span>
+              </motion.div>
 
-            {/* Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="grid grid-cols-3 gap-4 mt-16 max-w-2xl mx-auto"
-            >
-              {[
-                { label: "Active Players", value: "10K+" },
-                { label: "Quizzes Created", value: "5K+" },
-                { label: "Questions Answered", value: "100K+" },
-              ].map((stat, index) => (
-                <motion.div
-                  key={stat.label}
-                  whileHover={{ scale: 1.05 }}
-                  className="bg-dark-100 border border-primary-500/30 rounded-xl p-4"
+              {/* Main Heading */}
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-3xl lg:text-5xl font-bold mb-6"
+              >
+                Challenge Your Friends{" "}
+                <span className="glow-text block mt-4">
+                  Test Your Knowledge
+                </span>
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-lg sm:text-xl text-dark-500 mb-8 max-w-3xl tracking-wide"
+              >
+                Join the ultimate multiplayer quiz experience. Compete in
+                real-time, climb leaderboards, and prove you're the smartest
+                player in the room.
+              </motion.p>
+
+              {/* CTA Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="flex flex-col sm:flex-row gap-4"
+              >
+                <Link
+                  to="/join"
+                  className="btn-primary text-lg px-8 py-4 flex items-center justify-center space-x-2"
                 >
-                  <div className="text-2xl sm:text-3xl font-bold glow-text">
-                    {stat.value}
-                  </div>
-                  <div className="text-dark-500 text-sm mt-1">{stat.label}</div>
-                </motion.div>
-              ))}
+                  <Zap className="w-5 h-5" />
+                  <span>Start Quiz Now</span>
+                </Link>
+                <Link to="/create" className="btn-secondary text-lg px-8 py-4">
+                  Create Your Own Quiz
+                </Link>
+              </motion.div>
             </motion.div>
-          </motion.div>
+          </div>
         </div>
       </section>
 

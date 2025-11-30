@@ -1,13 +1,14 @@
-const express = require("express");
-const router = express.Router();
-const {
+import express from "express";
+import {
   createRoom,
   joinRoom,
   getRoomDetails,
   leaveRoom,
   getActiveRooms,
-} = require("../controllers/roomController");
-const { protect } = require("../middlewares/authMiddleware");
+} from "../controllers/roomController.js";
+import { protect } from "../middleware/auth.js";
+
+const router = express.Router();
 
 // Public routes
 router.get("/active", getActiveRooms);
@@ -18,4 +19,4 @@ router.post("/join", protect, joinRoom);
 router.get("/:roomCode", protect, getRoomDetails);
 router.post("/:roomCode/leave", protect, leaveRoom);
 
-module.exports = router;
+export default router;

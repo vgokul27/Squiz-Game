@@ -1,8 +1,8 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
 // Protect routes - verify JWT token
-const protect = async (req, res, next) => {
+export const protect = async (req, res, next) => {
   let token;
 
   if (
@@ -45,7 +45,7 @@ const protect = async (req, res, next) => {
 };
 
 // Admin middleware
-const admin = (req, res, next) => {
+export const admin = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     next();
   } else {
@@ -56,4 +56,13 @@ const admin = (req, res, next) => {
   }
 };
 
-module.exports = { protect, admin };
+// Optional: Require verified email
+export const requireVerified = (req, res, next) => {
+  if (!req.user.isVerified) {
+    return res.status(403).json({
+      success: false,
+      message: "Please verify your email to access this resource",
+    });
+  }
+  next();
+};

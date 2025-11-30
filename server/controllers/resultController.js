@@ -1,10 +1,10 @@
-const Result = require("../models/Result");
-const User = require("../models/User");
+import Result from "../models/Result.js";
+import User from "../models/User.js";
 
 // @desc    Save result
 // @route   POST /api/result
 // @access  Private
-const saveResult = async (req, res) => {
+export const saveResult = async (req, res) => {
   try {
     const {
       room,
@@ -55,7 +55,7 @@ const saveResult = async (req, res) => {
 // @desc    Get user results
 // @route   GET /api/result/my-results
 // @access  Private
-const getMyResults = async (req, res) => {
+export const getMyResults = async (req, res) => {
   try {
     const results = await Result.find({ user: req.user._id })
       .populate("quiz", "title category")
@@ -78,7 +78,7 @@ const getMyResults = async (req, res) => {
 // @desc    Get result by ID
 // @route   GET /api/result/:id
 // @access  Private
-const getResultById = async (req, res) => {
+export const getResultById = async (req, res) => {
   try {
     const result = await Result.findById(req.params.id)
       .populate("user", "username avatar")
@@ -106,7 +106,7 @@ const getResultById = async (req, res) => {
 // @desc    Get leaderboard (global)
 // @route   GET /api/result/leaderboard
 // @access  Public
-const getLeaderboard = async (req, res) => {
+export const getLeaderboard = async (req, res) => {
   try {
     const { limit = 100 } = req.query;
 
@@ -130,7 +130,7 @@ const getLeaderboard = async (req, res) => {
 // @desc    Get quiz leaderboard
 // @route   GET /api/result/leaderboard/:quizId
 // @access  Public
-const getQuizLeaderboard = async (req, res) => {
+export const getQuizLeaderboard = async (req, res) => {
   try {
     const { limit = 50 } = req.query;
 
@@ -149,12 +149,4 @@ const getQuizLeaderboard = async (req, res) => {
       message: error.message,
     });
   }
-};
-
-module.exports = {
-  saveResult,
-  getMyResults,
-  getResultById,
-  getLeaderboard,
-  getQuizLeaderboard,
 };

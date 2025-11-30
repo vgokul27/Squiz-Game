@@ -1,9 +1,9 @@
-const Quiz = require("../models/Quiz");
+import Quiz from "../models/Quiz.js";
 
 // @desc    Create new quiz
 // @route   POST /api/quiz
 // @access  Private (Admin)
-const createQuiz = async (req, res) => {
+export const createQuiz = async (req, res) => {
   try {
     const { title, description, category, difficulty, questions } = req.body;
 
@@ -31,7 +31,7 @@ const createQuiz = async (req, res) => {
 // @desc    Get all quizzes
 // @route   GET /api/quiz
 // @access  Public
-const getAllQuizzes = async (req, res) => {
+export const getAllQuizzes = async (req, res) => {
   try {
     const { category, difficulty, search } = req.query;
 
@@ -73,7 +73,7 @@ const getAllQuizzes = async (req, res) => {
 // @desc    Get quiz by ID
 // @route   GET /api/quiz/:id
 // @access  Public
-const getQuizById = async (req, res) => {
+export const getQuizById = async (req, res) => {
   try {
     const quiz = await Quiz.findById(req.params.id)
       .populate("createdBy", "username avatar")
@@ -101,7 +101,7 @@ const getQuizById = async (req, res) => {
 // @desc    Get full quiz (with answers) - for game logic
 // @route   GET /api/quiz/:id/full
 // @access  Private
-const getFullQuiz = async (req, res) => {
+export const getFullQuiz = async (req, res) => {
   try {
     const quiz = await Quiz.findById(req.params.id);
 
@@ -127,7 +127,7 @@ const getFullQuiz = async (req, res) => {
 // @desc    Update quiz
 // @route   PUT /api/quiz/:id
 // @access  Private (Admin/Creator)
-const updateQuiz = async (req, res) => {
+export const updateQuiz = async (req, res) => {
   try {
     const quiz = await Quiz.findById(req.params.id);
 
@@ -169,7 +169,7 @@ const updateQuiz = async (req, res) => {
 // @desc    Delete quiz
 // @route   DELETE /api/quiz/:id
 // @access  Private (Admin/Creator)
-const deleteQuiz = async (req, res) => {
+export const deleteQuiz = async (req, res) => {
   try {
     const quiz = await Quiz.findById(req.params.id);
 
@@ -208,7 +208,7 @@ const deleteQuiz = async (req, res) => {
 // @desc    Get user's created quizzes
 // @route   GET /api/quiz/my-quizzes
 // @access  Private
-const getMyQuizzes = async (req, res) => {
+export const getMyQuizzes = async (req, res) => {
   try {
     const quizzes = await Quiz.find({ createdBy: req.user._id }).sort({
       createdAt: -1,
@@ -225,14 +225,4 @@ const getMyQuizzes = async (req, res) => {
       message: error.message,
     });
   }
-};
-
-module.exports = {
-  createQuiz,
-  getAllQuizzes,
-  getQuizById,
-  getFullQuiz,
-  updateQuiz,
-  deleteQuiz,
-  getMyQuizzes,
 };

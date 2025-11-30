@@ -1,8 +1,8 @@
-const Room = require("../models/Room");
-const Quiz = require("../models/Quiz");
-const Result = require("../models/Result");
-const User = require("../models/User");
-const { calculateScore, sortPlayersByScore } = require("../utils/helpers");
+import Room from "../models/Room.js";
+import Quiz from "../models/Quiz.js";
+import Result from "../models/Result.js";
+import User from "../models/User.js";
+import { calculateScore, sortPlayersByScore } from "../utils/helpers.js";
 
 const quizSocket = (io) => {
   // Store active room timers
@@ -392,4 +392,4 @@ const quizSocket = (io) => {
   }
 };
 
-module.exports = quizSocket;
+export default quizSocket;

@@ -1,13 +1,14 @@
-const express = require("express");
-const router = express.Router();
-const {
+import express from "express";
+import {
   saveResult,
   getMyResults,
   getResultById,
   getLeaderboard,
   getQuizLeaderboard,
-} = require("../controllers/resultController");
-const { protect } = require("../middlewares/authMiddleware");
+} from "../controllers/resultController.js";
+import { protect } from "../middleware/auth.js";
+
+const router = express.Router();
 
 // Public routes
 router.get("/leaderboard", getLeaderboard);
@@ -18,4 +19,4 @@ router.post("/", protect, saveResult);
 router.get("/my-results", protect, getMyResults);
 router.get("/:id", protect, getResultById);
 
-module.exports = router;
+export default router;

@@ -1,11 +1,11 @@
-const Room = require("../models/Room");
-const Quiz = require("../models/Quiz");
-const { generateRoomCode } = require("../utils/helpers");
+import Room from "../models/Room.js";
+import Quiz from "../models/Quiz.js";
+import { generateRoomCode } from "../utils/helpers.js";
 
 // @desc    Create new room
 // @route   POST /api/room/create
 // @access  Private
-const createRoom = async (req, res) => {
+export const createRoom = async (req, res) => {
   try {
     const { quizId, maxPlayers } = req.body;
 
@@ -67,7 +67,7 @@ const createRoom = async (req, res) => {
 // @desc    Join room
 // @route   POST /api/room/join
 // @access  Private
-const joinRoom = async (req, res) => {
+export const joinRoom = async (req, res) => {
   try {
     const { roomCode } = req.body;
 
@@ -127,7 +127,7 @@ const joinRoom = async (req, res) => {
 // @desc    Get room details
 // @route   GET /api/room/:roomCode
 // @access  Private
-const getRoomDetails = async (req, res) => {
+export const getRoomDetails = async (req, res) => {
   try {
     const room = await Room.findOne({ roomCode: req.params.roomCode })
       .populate("host", "username avatar")
@@ -156,7 +156,7 @@ const getRoomDetails = async (req, res) => {
 // @desc    Leave room
 // @route   POST /api/room/:roomCode/leave
 // @access  Private
-const leaveRoom = async (req, res) => {
+export const leaveRoom = async (req, res) => {
   try {
     const room = await Room.findOne({ roomCode: req.params.roomCode });
 
@@ -210,7 +210,7 @@ const leaveRoom = async (req, res) => {
 // @desc    Get active rooms
 // @route   GET /api/room/active
 // @access  Public
-const getActiveRooms = async (req, res) => {
+export const getActiveRooms = async (req, res) => {
   try {
     const rooms = await Room.find({ status: "waiting" })
       .populate("host", "username avatar")
@@ -229,12 +229,4 @@ const getActiveRooms = async (req, res) => {
       message: error.message,
     });
   }
-};
-
-module.exports = {
-  createRoom,
-  joinRoom,
-  getRoomDetails,
-  leaveRoom,
-  getActiveRooms,
 };

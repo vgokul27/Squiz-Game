@@ -5,6 +5,7 @@ import { Mail, Lock, LogIn, Zap, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 import useUserStore from "../../store/userSlice";
 import api from "../../services/api";
+import AuthLayout from "../../components/AuthLayout";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -41,23 +42,27 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen pt-16 flex items-center justify-center px-4 py-12">
+    <AuthLayout>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md mx-auto"
       >
         {/* Logo */}
         <div className="text-center mb-8">
           <motion.div
             whileHover={{ rotate: 360 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex w-16 h-16 bg-gradient-purple rounded-2xl items-center justify-center shadow-neon mb-4"
+            className="inline-flex w-20 h-20 bg-gradient-purple rounded-2xl items-center justify-center shadow-neon-xl mb-6"
           >
-            <Zap className="w-8 h-8 text-white" />
+            <Zap className="w-10 h-10 text-white" />
           </motion.div>
-          <h1 className="text-3xl font-bold mb-2">Welcome Back!</h1>
-          <p className="text-dark-500">Login to continue your quiz journey</p>
+          <h1 className="text-4xl font-bold mb-3">
+            Welcome <span className="glow-text">Back!</span>
+          </h1>
+          <p className="text-dark-500 text-lg">
+            Login to continue your quiz journey
+          </p>
         </div>
 
         {/* Login Form */}
@@ -105,7 +110,7 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-500 hover:text-primary-500"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-500 hover:text-primary-500 transition-colors"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -118,16 +123,18 @@ const Login = () => {
 
             {/* Remember & Forgot */}
             <div className="flex items-center justify-between">
-              <label className="flex items-center space-x-2 cursor-pointer">
+              <label className="flex items-center space-x-2 cursor-pointer group">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 rounded border-dark-200 text-primary-500 focus:ring-primary-500"
+                  className="w-4 h-4 rounded border-dark-200 text-primary-500 focus:ring-primary-500 focus:ring-2"
                 />
-                <span className="text-sm text-dark-500">Remember me</span>
+                <span className="text-sm text-dark-500 group-hover:text-dark-400 transition-colors">
+                  Remember me
+                </span>
               </label>
               <Link
                 to="/forgot-password"
-                className="text-sm text-primary-500 hover:text-primary-400"
+                className="text-sm text-primary-500 hover:text-primary-400 transition-colors"
               >
                 Forgot password?
               </Link>
@@ -137,9 +144,9 @@ const Login = () => {
             <motion.button
               type="submit"
               disabled={loading}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full btn-primary flex items-center justify-center space-x-2"
+              whileHover={{ scale: loading ? 1 : 1.02 }}
+              whileTap={{ scale: loading ? 1 : 0.98 }}
+              className="w-full btn-primary flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -158,19 +165,19 @@ const Login = () => {
               <div className="w-full border-t border-dark-200" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-dark-100 text-dark-500">
+              <span className="px-4 bg-dark-100 text-dark-500">
                 Or continue with
               </span>
             </div>
           </div>
 
-          {/* Social Login (Optional) */}
+          {/* Social Login */}
           <div className="grid grid-cols-2 gap-4">
             <motion.button
               type="button"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="bg-dark-50 text-white px-4 py-3 rounded-lg font-medium hover:bg-dark-200 transition-all flex items-center justify-center space-x-2"
+              className="bg-dark-50 text-white px-4 py-3 rounded-lg font-medium hover:bg-dark-200 border border-dark-200 transition-all flex items-center justify-center space-x-2"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -196,7 +203,7 @@ const Login = () => {
               type="button"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="bg-dark-50 text-white px-4 py-3 rounded-lg font-medium hover:bg-dark-200 transition-all flex items-center justify-center space-x-2"
+              className="bg-dark-50 text-white px-4 py-3 rounded-lg font-medium hover:bg-dark-200 border border-dark-200 transition-all flex items-center justify-center space-x-2"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
@@ -211,15 +218,43 @@ const Login = () => {
               Don't have an account?{" "}
               <Link
                 to="/register"
-                className="text-primary-500 hover:text-primary-400 font-semibold"
+                className="text-primary-500 hover:text-primary-400 font-semibold transition-colors"
               >
                 Sign up
               </Link>
             </p>
           </div>
         </motion.form>
+
+        {/* Back to Home */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="text-center mt-6"
+        >
+          <Link
+            to="/"
+            className="text-dark-500 hover:text-primary-500 transition-colors inline-flex items-center space-x-2"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
+            </svg>
+            <span>Back to Home</span>
+          </Link>
+        </motion.div>
       </motion.div>
-    </div>
+    </AuthLayout>
   );
 };
 

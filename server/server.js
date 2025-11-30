@@ -1,15 +1,30 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const cors = require("cors");
-const { createServer } = require("http");
-const { Server } = require("socket.io");
-const connectDB = require("./config/db");
-const { notFound, errorHandler } = require("./middlewares/errorHandler");
+// Load env vars FIRST - BEFORE ANY IMPORTS
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 
-// Load env vars
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-// Connect to database
+// Load .env from server directory
+dotenv.config({ path: join(__dirname, ".env") });
+
+// NOW import everything else
+import express from "express";
+import cors from "cors";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import connectDB from "./config/db.js";
+import { notFound, errorHandler } from "./middleware/errorHandler.js";
+import { initializeEmailService } from "./services/emailService.js";
+import authRoutes from "./routes/authRoutes.js";
+import quizRoutes from "./routes/quizRoutes.js";
+import roomRoutes from "./routes/roomRoutes.js";
+import resultRoutes from "./routes/resultRoutes.js";
+import quizSocket from "./sockets/quizSocket.js";
+
+// Initialize services
+initializeEmailService(); // Initialize AFTER dotenv loads
 connectDB();
 
 // Create Express app
@@ -26,10 +41,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use("/api/auth", require("./routes/authRoutes"));
-app.use("/api/quiz", require("./routes/quizRoutes"));
-app.use("/api/room", require("./routes/roomRoutes"));
-app.use("/api/result", require("./routes/resultRoutes"));
+app.use("/api/auth", authRoutes);
+app.use("/api/quiz", quizRoutes);
+app.use("/api/room", roomRoutes);
+app.use("/api/result", resultRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {
@@ -56,7 +71,7 @@ const io = new Server(httpServer, {
 });
 
 // Socket.IO connection
-require("./sockets/quizSocket")(io);
+quizSocket(io);
 
 // Start server
 const PORT = process.env.PORT || 5000;

@@ -1,6 +1,5 @@
-const express = require("express");
-const router = express.Router();
-const {
+import express from "express";
+import {
   createQuiz,
   getAllQuizzes,
   getQuizById,
@@ -8,8 +7,10 @@ const {
   updateQuiz,
   deleteQuiz,
   getMyQuizzes,
-} = require("../controllers/quizController");
-const { protect, admin } = require("../middlewares/authMiddleware");
+} from "../controllers/quizController.js";
+import { protect, admin } from "../middleware/auth.js";
+
+const router = express.Router();
 
 // Public routes
 router.get("/", getAllQuizzes);
@@ -23,4 +24,4 @@ router.get("/user/my-quizzes", protect, getMyQuizzes);
 router.post("/", protect, admin, createQuiz);
 router.route("/:id").put(protect, updateQuiz).delete(protect, deleteQuiz);
 
-module.exports = router;
+export default router;

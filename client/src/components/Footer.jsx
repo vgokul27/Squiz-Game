@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Zap, Github, Twitter, Mail } from "lucide-react";
+import { Zap, Github, Instagram, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -35,12 +35,12 @@ const Footer = () => {
               </motion.a>
               <motion.a
                 whileHover={{ scale: 1.1, y: -2 }}
-                href="https://twitter.com"
+                href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-dark-500 hover:text-primary-500 transition-colors"
               >
-                <Twitter className="w-6 h-6" />
+                <Instagram className="w-6 h-6" />
               </motion.a>
               <motion.a
                 whileHover={{ scale: 1.1, y: -2 }}

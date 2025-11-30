@@ -2,6 +2,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "../pages/Home";
 import Login from "../features/auth/Login";
 import Register from "../features/auth/Register";
+import VerifyEmail from "../features/auth/VerifyEmail";
+import ForgotPassword from "../features/auth/ForgotPassword";
+import ResetPassword from "../features/auth/ResetPassword";
 import Dashboard from "../pages/Dashboard";
 import JoinRoom from "../features/lobby/JoinRoom";
 import CreateRoom from "../features/lobby/CreateRoom";
@@ -18,6 +21,9 @@ const AppRoutes = () => {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/verify-email/:token" element={<VerifyEmail />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/leaderboard" element={<Leaderboard />} />
 
       {/* Protected Routes */}
