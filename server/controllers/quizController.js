@@ -1,83 +1,201 @@
 import Quiz from "../models/Quiz.js";
+import User from "../models/User.js";
 
-// @desc    Create new quiz
-// @route   POST /api/quiz
-// @access  Private (Admin)
+// Create a new quiz (Manual)
 export const createQuiz = async (req, res) => {
   try {
-    const { title, description, category, difficulty, questions } = req.body;
-
-    const quiz = await Quiz.create({
+    const {
       title,
       description,
       category,
       difficulty,
+      timeLimit,
+      pointsPerQuestion,
+      isPublic,
       questions,
+    } = req.body;
+
+    // Validate required fields
+    if (!title || !category || !questions || questions.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Title, category, and at least one question are required",
+      });
+    }
+
+    // Format questions with default values
+    const formattedQuestions = questions.map((q) => ({
+      question: q.question,
+      options: q.options,
+      correctAnswer: q.correctAnswer,
+      points: pointsPerQuestion || 10,
+      timeLimit: q.timeLimit || timeLimit || 30,
+    }));
+
+    const quiz = await Quiz.create({
+      title,
+      description: description || "",
+      category,
+      difficulty: difficulty || "Medium",
+      questions: formattedQuestions,
       createdBy: req.user._id,
+      isPublic: isPublic !== undefined ? isPublic : true,
     });
 
     res.status(201).json({
       success: true,
-      data: quiz,
+      message: "Quiz created successfully",
+      quiz,
     });
   } catch (error) {
+    console.error("Create quiz error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to create quiz",
+      error: error.message,
     });
   }
 };
 
-// @desc    Get all quizzes
-// @route   GET /api/quiz
-// @access  Public
+// Generate quiz with AI (Gemini)
+export const generateAIQuiz = async (req, res) => {
+  try {
+    const { topic, category, difficulty, questionCount } = req.body;
+
+    if (!topic || !category) {
+      return res.status(400).json({
+        success: false,
+        message: "Topic and category are required",
+      });
+    }
+
+    // TODO: Integrate with Google Gemini AI
+    // For now, using mock data structure
+    const prompt = `Generate a ${difficulty} difficulty quiz about "${topic}" in the ${category} category with ${questionCount} multiple choice questions. Each question should have 4 options and indicate the correct answer.`;
+
+    console.log("AI Prompt:", prompt);
+
+    // Mock AI response - Replace with actual Gemini API call
+    const aiGeneratedQuestions = Array.from(
+      { length: questionCount },
+      (_, i) => ({
+        question: `AI Generated Question ${i + 1} about ${topic}?`,
+        options: [
+          `Option A for ${topic}`,
+          `Option B for ${topic}`,
+          `Option C for ${topic}`,
+          `Option D for ${topic}`,
+        ],
+        correctAnswer: Math.floor(Math.random() * 4),
+        points: 10,
+        timeLimit: 30,
+      })
+    );
+
+    // Return generated quiz data (not saved yet)
+    res.status(200).json({
+      success: true,
+      message: "Quiz generated successfully",
+      quiz: {
+        title: `${topic} Quiz`,
+        description: `An AI-generated quiz about ${topic}`,
+        category,
+        difficulty,
+        questions: aiGeneratedQuestions,
+      },
+    });
+  } catch (error) {
+    console.error("AI generation error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to generate quiz",
+      error: error.message,
+    });
+  }
+};
+
+// Save AI-generated quiz
+export const saveAIQuiz = async (req, res) => {
+  try {
+    const { title, description, category, difficulty, questions } = req.body;
+
+    if (!title || !category || !questions || questions.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid quiz data",
+      });
+    }
+
+    const quiz = await Quiz.create({
+      title,
+      description: description || "",
+      category,
+      difficulty: difficulty || "Medium",
+      questions,
+      createdBy: req.user._id,
+      isPublic: true,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "AI-generated quiz saved successfully",
+      quiz,
+    });
+  } catch (error) {
+    console.error("Save AI quiz error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to save quiz",
+      error: error.message,
+    });
+  }
+};
+
+// Get all public quizzes
 export const getAllQuizzes = async (req, res) => {
   try {
     const { category, difficulty, search } = req.query;
 
     let filter = { isPublic: true };
 
-    if (category && category !== "All") {
+    if (category && category !== "all") {
       filter.category = category;
     }
 
-    if (difficulty && difficulty !== "All") {
+    if (difficulty) {
       filter.difficulty = difficulty;
     }
 
     if (search) {
-      filter.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-      ];
+      filter.title = { $regex: search, $options: "i" };
     }
 
     const quizzes = await Quiz.find(filter)
       .populate("createdBy", "username")
-      .select("-questions.correctAnswer") // Don't send correct answers
       .sort({ createdAt: -1 });
 
-    res.json({
+    res.status(200).json({
       success: true,
       count: quizzes.length,
-      data: quizzes,
+      quizzes,
     });
   } catch (error) {
+    console.error("Get quizzes error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to fetch quizzes",
+      error: error.message,
     });
   }
 };
 
-// @desc    Get quiz by ID
-// @route   GET /api/quiz/:id
-// @access  Public
+// Get quiz by ID
 export const getQuizById = async (req, res) => {
   try {
-    const quiz = await Quiz.findById(req.params.id)
-      .populate("createdBy", "username avatar")
-      .select("-questions.correctAnswer"); // Don't send correct answers
+    const quiz = await Quiz.findById(req.params.id).populate(
+      "createdBy",
+      "username"
+    );
 
     if (!quiz) {
       return res.status(404).json({
@@ -86,89 +204,43 @@ export const getQuizById = async (req, res) => {
       });
     }
 
-    res.json({
+    res.status(200).json({
       success: true,
-      data: quiz,
+      quiz,
     });
   } catch (error) {
+    console.error("Get quiz error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to fetch quiz",
+      error: error.message,
     });
   }
 };
 
-// @desc    Get full quiz (with answers) - for game logic
-// @route   GET /api/quiz/:id/full
-// @access  Private
-export const getFullQuiz = async (req, res) => {
+// Get user's created quizzes
+export const getMyQuizzes = async (req, res) => {
   try {
-    const quiz = await Quiz.findById(req.params.id);
+    const quizzes = await Quiz.find({ createdBy: req.user._id }).sort({
+      createdAt: -1,
+    });
 
-    if (!quiz) {
-      return res.status(404).json({
-        success: false,
-        message: "Quiz not found",
-      });
-    }
-
-    res.json({
+    res.status(200).json({
       success: true,
-      data: quiz,
+      count: quizzes.length,
+      quizzes,
     });
   } catch (error) {
+    console.error("Get my quizzes error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to fetch quizzes",
+      error: error.message,
     });
   }
 };
 
-// @desc    Update quiz
-// @route   PUT /api/quiz/:id
-// @access  Private (Admin/Creator)
-export const updateQuiz = async (req, res) => {
-  try {
-    const quiz = await Quiz.findById(req.params.id);
-
-    if (!quiz) {
-      return res.status(404).json({
-        success: false,
-        message: "Quiz not found",
-      });
-    }
-
-    // Check if user is creator or admin
-    if (
-      quiz.createdBy.toString() !== req.user._id.toString() &&
-      req.user.role !== "admin"
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: "Not authorized to update this quiz",
-      });
-    }
-
-    const updatedQuiz = await Quiz.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-
-    res.json({
-      success: true,
-      data: updatedQuiz,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-// @desc    Delete quiz
-// @route   DELETE /api/quiz/:id
-// @access  Private (Admin/Creator)
+// Delete quiz
 export const deleteQuiz = async (req, res) => {
   try {
     const quiz = await Quiz.findById(req.params.id);
@@ -180,11 +252,8 @@ export const deleteQuiz = async (req, res) => {
       });
     }
 
-    // Check if user is creator or admin
-    if (
-      quiz.createdBy.toString() !== req.user._id.toString() &&
-      req.user.role !== "admin"
-    ) {
+    // Check if user is the creator
+    if (quiz.createdBy.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to delete this quiz",
@@ -193,36 +262,16 @@ export const deleteQuiz = async (req, res) => {
 
     await quiz.deleteOne();
 
-    res.json({
+    res.status(200).json({
       success: true,
       message: "Quiz deleted successfully",
     });
   } catch (error) {
+    console.error("Delete quiz error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
-    });
-  }
-};
-
-// @desc    Get user's created quizzes
-// @route   GET /api/quiz/my-quizzes
-// @access  Private
-export const getMyQuizzes = async (req, res) => {
-  try {
-    const quizzes = await Quiz.find({ createdBy: req.user._id }).sort({
-      createdAt: -1,
-    });
-
-    res.json({
-      success: true,
-      count: quizzes.length,
-      data: quizzes,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
+      message: "Failed to delete quiz",
+      error: error.message,
     });
   }
 };

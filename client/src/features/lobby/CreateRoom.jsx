@@ -8,6 +8,7 @@ import {
   BookOpen,
   Zap,
   Brain,
+  Lock,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import useUserStore from "../../store/userSlice";
@@ -15,6 +16,9 @@ import useUserStore from "../../store/userSlice";
 const CreateRoom = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useUserStore();
+
+  // Admin email from environment variable
+  const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
 
   const options = [
     {
@@ -31,6 +35,7 @@ const CreateRoom = () => {
         "Track statistics",
       ],
       action: () => navigate("/quiz/create"),
+      adminOnly: true,
     },
     {
       id: "create-room",
@@ -45,6 +50,7 @@ const CreateRoom = () => {
         "Instant results",
       ],
       action: () => navigate("/room/create"),
+      adminOnly: true,
     },
     {
       id: "ai-quiz",
@@ -60,25 +66,30 @@ const CreateRoom = () => {
       ],
       action: () => navigate("/quiz/ai-create"),
       badge: "AI Powered",
+      adminOnly: true,
     },
   ];
 
+  // Check if user is admin
+  const isAdmin = user?.email === ADMIN_EMAIL;
+
   const handleOptionClick = (option) => {
+    // Check authentication
     if (!isAuthenticated) {
       toast.error("Please login to continue");
       navigate("/login");
       return;
     }
 
-    // Check if admin role is required for quiz creation
-    if (
-      (option.id === "create-quiz" || option.id === "ai-quiz") &&
-      user?.role !== "admin"
-    ) {
-      toast.error("Only admins can create quizzes");
+    // Check if admin access is required
+    if (option.adminOnly && !isAdmin) {
+      toast.error(
+        "⚠️ Admin access required. Only admins can create quizzes and rooms."
+      );
       return;
     }
 
+    // Navigate to the action
     option.action();
   };
 
@@ -95,104 +106,181 @@ const CreateRoom = () => {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: "spring" }}
-            className="inline-flex items-center justify-center w-20 h-20 bg-gradient-purple rounded-2xl mb-6 shadow-neon"
+            className="inline-flex items-center justify-center w-14 h-14 bg-gradient-purple rounded-2xl mb-6 shadow-neon"
           >
-            <Zap className="w-10 h-10 text-white" />
+            <Zap className="w-8 h-8 text-white" />
           </motion.div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4">
             Create Your <span className="glow-text">Quiz Experience</span>
           </h1>
-          <p className="text-dark-500 text-lg md:text-xl max-w-3xl mx-auto">
+          <p className="text-dark-500 text-sm lg:text-lg max-w-3xl mx-auto">
             Choose how you want to engage your audience - create a custom quiz,
             start a multiplayer battle, or let AI generate one for you
           </p>
+
+          {/* Admin Badge */}
+          {isAuthenticated && isAdmin && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4 }}
+              className="inline-flex items-center space-x-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/50 rounded-full px-4 py-2 mt-4"
+            >
+              <Sparkles className="w-4 h-4 text-yellow-400" />
+              <span className="text-yellow-400 text-sm font-semibold">
+                Admin Access Granted
+              </span>
+            </motion.div>
+          )}
+
+          {/* Non-Admin Warning */}
+          {isAuthenticated && !isAdmin && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4 }}
+              className="inline-flex items-center space-x-2 bg-red-500/20 border border-red-500/50 rounded-full px-4 py-2 mt-4"
+            >
+              <Lock className="w-4 h-4 text-red-400" />
+              <span className="text-red-400 text-sm font-semibold">
+                Admin-only features. Contact administrator for access.
+              </span>
+            </motion.div>
+          )}
         </motion.div>
 
         {/* Options Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {options.map((option, index) => (
-            <motion.div
-              key={option.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ y: -10 }}
-              onClick={() => handleOptionClick(option)}
-              className="relative group cursor-pointer"
-            >
-              {/* Card */}
-              <div className="card-neon h-full overflow-hidden group-hover:shadow-neon-lg transition-all duration-300">
-                {/* Gradient Background */}
+          {options.map((option, index) => {
+            const isLocked = option.adminOnly && !isAdmin;
+
+            return (
+              <motion.div
+                key={option.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={!isLocked ? { y: -10 } : {}}
+                onClick={() => handleOptionClick(option)}
+                className={`relative group ${
+                  isLocked ? "cursor-not-allowed" : "cursor-pointer"
+                }`}
+              >
+                {/* Card */}
                 <div
-                  className={`absolute inset-0 bg-gradient-to-br ${option.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
-                />
+                  className={`card-neon h-full overflow-hidden transition-all duration-300 ${
+                    isLocked
+                      ? "opacity-50 hover:opacity-60"
+                      : "group-hover:shadow-neon-lg"
+                  }`}
+                >
+                  {/* Gradient Background */}
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${option.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
+                  />
 
-                {/* Badge */}
-                {option.badge && (
-                  <div className="absolute top-4 right-4">
-                    <span className="px-3 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold rounded-full shadow-neon">
-                      {option.badge}
-                    </span>
-                  </div>
-                )}
+                  {/* Lock Icon for Non-Admins */}
+                  {isLocked && (
+                    <div className="absolute top-4 left-4 z-20">
+                      <div className="w-10 h-10 bg-red-500/20 border border-red-500/50 rounded-full flex items-center justify-center">
+                        <Lock className="w-5 h-5 text-red-400" />
+                      </div>
+                    </div>
+                  )}
 
-                <div className="relative z-10 p-6">
-                  {/* Icon */}
-                  <motion.div
-                    whileHover={{ rotate: 360, scale: 1.1 }}
-                    transition={{ duration: 0.5 }}
-                    className={`w-16 h-16 bg-gradient-to-br ${option.color} rounded-xl flex items-center justify-center mb-4 shadow-neon group-hover:shadow-neon-lg transition-shadow`}
-                  >
-                    <option.icon className="w-8 h-8 text-white" />
-                  </motion.div>
+                  {/* Badge */}
+                  {option.badge && (
+                    <div className="absolute top-4 right-4 z-20">
+                      <span className="px-3 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold rounded-full shadow-neon">
+                        {option.badge}
+                      </span>
+                    </div>
+                  )}
 
-                  {/* Title */}
-                  <h3 className="text-2xl font-bold text-white mb-3 group-hover:glow-text transition-all">
-                    {option.title}
-                  </h3>
-
-                  {/* Description */}
-                  <p className="text-dark-500 mb-6 leading-relaxed">
-                    {option.description}
-                  </p>
-
-                  {/* Features */}
-                  <div className="space-y-2 mb-6">
-                    {option.features.map((feature, idx) => (
-                      <motion.div
-                        key={idx}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 + idx * 0.05 }}
-                        className="flex items-center space-x-2"
-                      >
-                        <div
-                          className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${option.color}`}
-                        />
-                        <span className="text-dark-500 text-sm">{feature}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  {/* Button */}
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className={`w-full bg-gradient-to-r ${option.color} text-white py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 shadow-lg hover:shadow-neon transition-all`}
-                  >
-                    <span>Get Started</span>
+                  <div className="relative z-10 p-6">
+                    {/* Icon */}
                     <motion.div
-                      animate={{ x: [0, 5, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
+                      whileHover={!isLocked ? { rotate: 360, scale: 1.1 } : {}}
+                      transition={{ duration: 0.5 }}
+                      className={`w-16 h-16 bg-gradient-to-br ${
+                        option.color
+                      } rounded-xl flex items-center justify-center mb-4 shadow-neon transition-shadow ${
+                        !isLocked && "group-hover:shadow-neon-lg"
+                      }`}
                     >
-                      →
+                      <option.icon className="w-8 h-8 text-white" />
                     </motion.div>
-                  </motion.button>
+
+                    {/* Title */}
+                    <h3
+                      className={`text-2xl font-bold text-white mb-3 transition-all ${
+                        !isLocked && "group-hover:glow-text"
+                      }`}
+                    >
+                      {option.title}
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-dark-500 mb-6 leading-relaxed">
+                      {option.description}
+                    </p>
+
+                    {/* Features */}
+                    <div className="space-y-2 mb-6">
+                      {option.features.map((feature, idx) => (
+                        <motion.div
+                          key={idx}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 + idx * 0.05 }}
+                          className="flex items-center space-x-2"
+                        >
+                          <div
+                            className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${option.color}`}
+                          />
+                          <span className="text-dark-500 text-sm">
+                            {feature}
+                          </span>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    {/* Button */}
+                    <motion.button
+                      whileHover={!isLocked ? { scale: 1.05 } : {}}
+                      whileTap={!isLocked ? { scale: 0.95 } : {}}
+                      disabled={isLocked}
+                      className={`w-full bg-gradient-to-r ${
+                        option.color
+                      } text-white py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 shadow-lg transition-all ${
+                        isLocked
+                          ? "cursor-not-allowed opacity-50"
+                          : "hover:shadow-neon"
+                      }`}
+                    >
+                      {isLocked ? (
+                        <>
+                          <Lock className="w-4 h-4" />
+                          <span>Admin Only</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Get Started</span>
+                          <motion.div
+                            animate={{ x: [0, 5, 0] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                          >
+                            →
+                          </motion.div>
+                        </>
+                      )}
+                    </motion.button>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </div>
 
         {/* Info Section */}

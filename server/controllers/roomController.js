@@ -1,13 +1,23 @@
 import Room from "../models/Room.js";
 import Quiz from "../models/Quiz.js";
-import { generateRoomCode } from "../utils/helpers.js";
+import crypto from "crypto";
 
-// @desc    Create new room
-// @route   POST /api/room/create
-// @access  Private
+// Generate unique room code
+const generateRoomCode = () => {
+  return crypto.randomBytes(3).toString("hex").toUpperCase();
+};
+
+// Create a new room
 export const createRoom = async (req, res) => {
   try {
-    const { quizId, maxPlayers } = req.body;
+    const { quizId, maxPlayers, isPrivate, waitingTime } = req.body;
+
+    if (!quizId) {
+      return res.status(400).json({
+        success: false,
+        message: "Quiz ID is required",
+      });
+    }
 
     // Check if quiz exists
     const quiz = await Quiz.findById(quizId);
@@ -20,16 +30,12 @@ export const createRoom = async (req, res) => {
 
     // Generate unique room code
     let roomCode;
-    let roomExists = true;
-
-    while (roomExists) {
+    let isUnique = false;
+    while (!isUnique) {
       roomCode = generateRoomCode();
-      const existingRoom = await Room.findOne({
-        roomCode,
-        status: { $ne: "finished" },
-      });
+      const existingRoom = await Room.findOne({ roomCode });
       if (!existingRoom) {
-        roomExists = false;
+        isUnique = true;
       }
     }
 
@@ -39,46 +45,58 @@ export const createRoom = async (req, res) => {
       host: req.user._id,
       quiz: quizId,
       maxPlayers: maxPlayers || 10,
+      status: "waiting",
       players: [
         {
           userId: req.user._id,
           username: req.user.username,
+          score: 0,
           isReady: true,
         },
       ],
     });
 
-    const populatedRoom = await Room.findById(room._id)
-      .populate("host", "username avatar")
-      .populate("quiz", "title description category difficulty questions");
+    await room.populate("quiz", "title category difficulty questions");
+    await room.populate("host", "username");
 
     res.status(201).json({
       success: true,
-      data: populatedRoom,
+      message: "Room created successfully",
+      room,
+      roomCode,
     });
   } catch (error) {
+    console.error("Create room error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to create room",
+      error: error.message,
     });
   }
 };
 
-// @desc    Join room
-// @route   POST /api/room/join
-// @access  Private
+// Join a room
 export const joinRoom = async (req, res) => {
   try {
     const { roomCode } = req.body;
 
-    const room = await Room.findOne({ roomCode, status: "waiting" })
-      .populate("host", "username avatar")
-      .populate("quiz", "title description category difficulty");
+    if (!roomCode) {
+      return res.status(400).json({
+        success: false,
+        message: "Room code is required",
+      });
+    }
+
+    const room = await Room.findOne({
+      roomCode: roomCode.toUpperCase(),
+    })
+      .populate("quiz", "title category difficulty questions")
+      .populate("host", "username");
 
     if (!room) {
       return res.status(404).json({
         success: false,
-        message: "Room not found or already started",
+        message: "Room not found",
       });
     }
 
@@ -90,16 +108,16 @@ export const joinRoom = async (req, res) => {
       });
     }
 
-    // Check if user already in room
-    const alreadyJoined = room.players.some(
-      (player) => player.userId.toString() === req.user._id.toString()
+    // Check if already in room
+    const alreadyInRoom = room.players.some(
+      (p) => p.userId.toString() === req.user._id.toString()
     );
 
-    if (alreadyJoined) {
-      return res.json({
+    if (alreadyInRoom) {
+      return res.status(200).json({
         success: true,
-        data: room,
         message: "Already in room",
+        room,
       });
     }
 
@@ -107,32 +125,36 @@ export const joinRoom = async (req, res) => {
     room.players.push({
       userId: req.user._id,
       username: req.user.username,
+      score: 0,
       isReady: false,
     });
 
     await room.save();
 
-    res.json({
+    res.status(200).json({
       success: true,
-      data: room,
+      message: "Joined room successfully",
+      room,
     });
   } catch (error) {
+    console.error("Join room error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to join room",
+      error: error.message,
     });
   }
 };
 
-// @desc    Get room details
-// @route   GET /api/room/:roomCode
-// @access  Private
-export const getRoomDetails = async (req, res) => {
+// Get room by code
+export const getRoomByCode = async (req, res) => {
   try {
-    const room = await Room.findOne({ roomCode: req.params.roomCode })
-      .populate("host", "username avatar")
-      .populate("quiz", "title description category difficulty questions")
-      .populate("players.userId", "username avatar");
+    const { roomCode } = req.params;
+
+    const room = await Room.findOne({ roomCode: roomCode.toUpperCase() })
+      .populate("quiz")
+      .populate("host", "username")
+      .populate("players.userId", "username");
 
     if (!room) {
       return res.status(404).json({
@@ -141,24 +163,26 @@ export const getRoomDetails = async (req, res) => {
       });
     }
 
-    res.json({
+    res.status(200).json({
       success: true,
-      data: room,
+      room,
     });
   } catch (error) {
+    console.error("Get room error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to fetch room",
+      error: error.message,
     });
   }
 };
 
-// @desc    Leave room
-// @route   POST /api/room/:roomCode/leave
-// @access  Private
+// Leave room
 export const leaveRoom = async (req, res) => {
   try {
-    const room = await Room.findOne({ roomCode: req.params.roomCode });
+    const { roomCode } = req.params;
+
+    const room = await Room.findOne({ roomCode: roomCode.toUpperCase() });
 
     if (!room) {
       return res.status(404).json({
@@ -169,64 +193,76 @@ export const leaveRoom = async (req, res) => {
 
     // Remove player from room
     room.players = room.players.filter(
-      (player) => player.userId.toString() !== req.user._id.toString()
+      (p) => p.userId.toString() !== req.user._id.toString()
     );
 
-    // If host leaves and room is waiting, delete room
-    if (
-      room.host.toString() === req.user._id.toString() &&
-      room.status === "waiting"
-    ) {
+    // If room is empty, delete it
+    if (room.players.length === 0) {
       await room.deleteOne();
-      return res.json({
+      return res.status(200).json({
         success: true,
-        message: "Room deleted as host left",
+        message: "Room deleted (no players left)",
       });
     }
 
-    // If no players left, delete room
-    if (room.players.length === 0) {
-      await room.deleteOne();
-      return res.json({
-        success: true,
-        message: "Room deleted - no players left",
-      });
+    // If host left, assign new host
+    if (room.host.toString() === req.user._id.toString()) {
+      room.host = room.players[0].userId;
     }
 
     await room.save();
 
-    res.json({
+    res.status(200).json({
       success: true,
       message: "Left room successfully",
     });
   } catch (error) {
+    console.error("Leave room error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to leave room",
+      error: error.message,
     });
   }
 };
 
-// @desc    Get active rooms
-// @route   GET /api/room/active
-// @access  Public
-export const getActiveRooms = async (req, res) => {
+// Start game
+export const startGame = async (req, res) => {
   try {
-    const rooms = await Room.find({ status: "waiting" })
-      .populate("host", "username avatar")
-      .populate("quiz", "title category difficulty")
-      .sort({ createdAt: -1 })
-      .limit(20);
+    const { roomCode } = req.params;
 
-    res.json({
+    const room = await Room.findOne({ roomCode: roomCode.toUpperCase() });
+
+    if (!room) {
+      return res.status(404).json({
+        success: false,
+        message: "Room not found",
+      });
+    }
+
+    // Check if user is host
+    if (room.host.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Only host can start the game",
+      });
+    }
+
+    room.status = "in-progress";
+    room.startTime = new Date();
+    await room.save();
+
+    res.status(200).json({
       success: true,
-      count: rooms.length,
-      data: rooms,
+      message: "Game started",
+      room,
     });
   } catch (error) {
+    console.error("Start game error:", error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to start game",
+      error: error.message,
     });
   }
 };

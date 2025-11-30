@@ -22,7 +22,7 @@ const questionSchema = new mongoose.Schema({
   },
   timeLimit: {
     type: Number,
-    default: 30, // seconds
+    default: 30,
   },
 });
 
@@ -45,19 +45,24 @@ const quizSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: [
-        "General",
+        "General Knowledge",
         "Science",
+        "Mathematics",
         "History",
+        "Geography",
         "Sports",
-        "Entertainment",
         "Technology",
-        "Other",
+        "Entertainment",
+        "Literature",
+        "Arts",
+        "Business",
+        "Politics",
       ],
     },
     difficulty: {
       type: String,
-      enum: ["Easy", "Medium", "Hard"],
-      default: "Medium",
+      enum: ["easy", "medium", "hard"],
+      default: "medium",
     },
     questions: [questionSchema],
     createdBy: {

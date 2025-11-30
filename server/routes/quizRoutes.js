@@ -1,14 +1,14 @@
 import express from "express";
 import {
   createQuiz,
+  generateAIQuiz,
+  saveAIQuiz,
   getAllQuizzes,
   getQuizById,
-  getFullQuiz,
-  updateQuiz,
-  deleteQuiz,
   getMyQuizzes,
+  deleteQuiz,
 } from "../controllers/quizController.js";
-import { protect, admin } from "../middleware/auth.js";
+import { protect } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -16,12 +16,11 @@ const router = express.Router();
 router.get("/", getAllQuizzes);
 router.get("/:id", getQuizById);
 
-// Private routes
-router.get("/:id/full", protect, getFullQuiz);
+// Protected routes
+router.post("/create", protect, createQuiz);
+router.post("/ai-generate", protect, generateAIQuiz);
+router.post("/ai-save", protect, saveAIQuiz);
 router.get("/user/my-quizzes", protect, getMyQuizzes);
-
-// Admin routes
-router.post("/", protect, admin, createQuiz);
-router.route("/:id").put(protect, updateQuiz).delete(protect, deleteQuiz);
+router.delete("/:id", protect, deleteQuiz);
 
 export default router;

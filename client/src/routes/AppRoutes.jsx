@@ -8,6 +8,9 @@ import ResetPassword from "../features/auth/ResetPassword";
 import Dashboard from "../pages/Dashboard";
 import JoinRoom from "../features/lobby/JoinRoom";
 import CreateRoom from "../features/lobby/CreateRoom";
+import QuizCreate from "../pages/QuizCreate";
+import RoomCreate from "../pages/RoomCreate";
+import AIQuizCreate from "../pages/AIQuizCreate";
 import QuizRoom from "../features/quiz/QuizRoom";
 import ResultPage from "../features/results/ResultPage";
 import Leaderboard from "../features/quiz/Leaderboard";
@@ -43,6 +46,8 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+
+      {/* Create Options - Selection Page */}
       <Route
         path="/create"
         element={
@@ -51,6 +56,34 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+
+      {/* Quiz Creation Routes */}
+      <Route
+        path="/quiz/create"
+        element={
+          <ProtectedRoute>
+            <QuizCreate />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/room/create"
+        element={
+          <ProtectedRoute>
+            <RoomCreate />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/quiz/ai-create"
+        element={
+          <ProtectedRoute>
+            <AIQuizCreate />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Quiz Room Routes */}
       <Route
         path="/room/:roomCode"
         element={

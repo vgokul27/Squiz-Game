@@ -16,17 +16,33 @@ function AppContent() {
     "/reset-password",
   ];
 
+  // Routes where Navbar and Footer should be hidden (quiz in progress & results)
+  const quizInProgressRoutes = [
+    "/room/:code/lobby",
+    "/room/:code/play",
+    "/results/",
+  ];
+
   const isAuthPage = authRoutes.some((route) =>
     location.pathname.startsWith(route)
   );
 
+  // Only hide navbar for actual quiz gameplay routes, not creation routes
+  const isQuizInProgress =
+    (location.pathname.includes("/room/") &&
+      (location.pathname.includes("/lobby") ||
+        location.pathname.includes("/play"))) ||
+    location.pathname.startsWith("/results/");
+
+  const shouldHideNavFooter = isAuthPage || isQuizInProgress;
+
   return (
     <div className="min-h-screen bg-dark-50 text-white">
-      {!isAuthPage && <Navbar />}
+      {!shouldHideNavFooter && <Navbar />}
       <main>
         <AppRoutes />
       </main>
-      {!isAuthPage && <Footer />}
+      {!shouldHideNavFooter && <Footer />}
       <Toaster
         position="top-right"
         toastOptions={{

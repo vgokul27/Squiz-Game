@@ -51,9 +51,7 @@ const Navbar = () => {
               >
                 <Zap className="w-6 h-6 text-white" />
               </motion.div>
-              <span className="text-2xl font-bold glow-text hidden sm:block">
-                Squiz Game
-              </span>
+              <span className="text-2xl font-bold glow-text">Squiz Game</span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -134,89 +132,102 @@ const Navbar = () => {
               transition={{ type: "tween", duration: 0.3 }}
               className="fixed top-0 left-0 h-full w-64 bg-dark-100 border-r border-primary-500/30 z-50 md:hidden shadow-neon-lg"
             >
-              <div className="p-6">
-                {/* Logo in Sidebar */}
-                <Link
-                  to="/"
-                  onClick={toggleMenu}
-                  className="flex items-center space-x-2 mb-8"
-                >
-                  <div className="w-10 h-10 bg-gradient-purple rounded-lg flex items-center justify-center">
-                    <Zap className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-xl font-bold glow-text">
-                    Squiz Game
-                  </span>
-                </Link>
+              <div className="flex flex-col h-full">
+                {/* Header with Logo and Close Button */}
+                <div className="flex items-center justify-between p-4 border-b border-primary-500/30">
+                  <Link
+                    to="/"
+                    onClick={toggleMenu}
+                    className="flex items-center space-x-2"
+                  >
+                    <div className="w-10 h-10 bg-gradient-purple rounded-lg flex items-center justify-center">
+                      <Zap className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="text-xl font-bold glow-text">
+                      Squiz Game
+                    </span>
+                  </Link>
+                  <button
+                    onClick={toggleMenu}
+                    className="text-primary-500 hover:text-primary-400 transition-colors p-2 hover:bg-dark-50 rounded-lg"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
 
-                {/* User Info */}
-                {isAuthenticated && (
-                  <div className="mb-6 p-4 bg-dark-50 rounded-lg border border-primary-500/30">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-gradient-purple rounded-full flex items-center justify-center">
-                        <User className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-white font-semibold">
-                          {user?.username}
-                        </p>
-                        <p className="text-dark-500 text-sm">{user?.email}</p>
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto p-4">
+                  {/* User Info */}
+                  {isAuthenticated && (
+                    <div className="mb-6 p-3 bg-dark-50 rounded-lg border border-primary-500/30">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gradient-purple rounded-full flex items-center justify-center flex-shrink-0">
+                          <User className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white font-semibold text-sm truncate">
+                            {user?.username}
+                          </p>
+                          <p className="text-dark-500 text-xs truncate">
+                            {user?.email}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-
-                {/* Navigation Links */}
-                <div className="space-y-2">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.name}
-                      to={link.path}
-                      onClick={toggleMenu}
-                      className="flex items-center space-x-3 text-dark-600 hover:text-primary-500 hover:bg-dark-50 p-3 rounded-lg transition-all"
-                    >
-                      <link.icon className="w-5 h-5" />
-                      <span className="font-medium">{link.name}</span>
-                    </Link>
-                  ))}
-
-                  {isAuthenticated ? (
-                    <>
-                      <Link
-                        to="/dashboard"
-                        onClick={toggleMenu}
-                        className="flex items-center space-x-3 text-dark-600 hover:text-primary-500 hover:bg-dark-50 p-3 rounded-lg transition-all"
-                      >
-                        <User className="w-5 h-5" />
-                        <span className="font-medium">Dashboard</span>
-                      </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center space-x-3 text-red-500 hover:bg-red-500/10 p-3 rounded-lg transition-all"
-                      >
-                        <LogOut className="w-5 h-5" />
-                        <span className="font-medium">Logout</span>
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <Link
-                        to="/login"
-                        onClick={toggleMenu}
-                        className="flex items-center space-x-3 text-dark-600 hover:text-primary-500 hover:bg-dark-50 p-3 rounded-lg transition-all"
-                      >
-                        <LogIn className="w-5 h-5" />
-                        <span className="font-medium">Login</span>
-                      </Link>
-                      <Link
-                        to="/register"
-                        onClick={toggleMenu}
-                        className="btn-primary w-full text-center mt-4"
-                      >
-                        Sign Up
-                      </Link>
-                    </>
                   )}
+
+                  {/* Navigation Links */}
+                  <div className="space-y-2">
+                    {navLinks.map((link) => (
+                      <Link
+                        key={link.name}
+                        to={link.path}
+                        onClick={toggleMenu}
+                        className="flex items-center space-x-3 text-dark-600 hover:text-primary-500 hover:bg-dark-50 p-3 rounded-lg transition-all"
+                      >
+                        <link.icon className="w-5 h-5" />
+                        <span className="font-medium">{link.name}</span>
+                      </Link>
+                    ))}
+
+                    {isAuthenticated ? (
+                      <>
+                        <Link
+                          to="/dashboard"
+                          onClick={toggleMenu}
+                          className="flex items-center space-x-3 text-dark-600 hover:text-primary-500 hover:bg-dark-50 p-3 rounded-lg transition-all"
+                        >
+                          <User className="w-5 h-5" />
+                          <span className="font-medium">Dashboard</span>
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center space-x-3 text-red-500 hover:bg-red-500/10 p-3 rounded-lg transition-all"
+                        >
+                          <LogOut className="w-5 h-5" />
+                          <span className="font-medium">Logout</span>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <Link
+                          to="/login"
+                          onClick={toggleMenu}
+                          className="flex items-center space-x-3 text-dark-600 hover:text-primary-500 hover:bg-dark-50 p-3 rounded-lg transition-all"
+                        >
+                          <LogIn className="w-5 h-5" />
+                          <span className="font-medium">Login</span>
+                        </Link>
+                        <Link
+                          to="/register"
+                          onClick={toggleMenu}
+                          className="btn-primary w-full text-center mt-4"
+                        >
+                          Sign Up
+                        </Link>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </motion.div>
